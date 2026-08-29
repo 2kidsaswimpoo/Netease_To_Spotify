@@ -1,0 +1,7 @@
+---
+client_id: "YOUR_SPOTIFY_CLIENT_ID"
+client_secret: "YOUR_SPOTIFY_CLIENT_SECRET"
+redirect_uri: "http://127.0.0.1:8888/callback"
+cover_image_path: "DESIRED_SPOTIFY_PLAYLIST_COVER_IMAGE_PATH"
+netease_playlist_id: "YOUR_NETEASE_PLAYLIST_ID"
+netease_cookie: "YOUR_NETEASE_COOKIE_HERE"

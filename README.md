@@ -1,40 +1,92 @@
-<p align="center"><img src="assets/cover.png" /></p>
+<p align="center"><img src="assets/cover.png" alt="Netease to Spotify" /></p>
 
-# 网易云音乐歌单迁移至Spotify
+# Netease to Spotify
 
-## 3首歌/秒（Spotify API最近变慢了），保留原歌单顺序，支持任意歌单长度，全过程不产生费用
+将网易云音乐歌单、关注歌手和收藏专辑迁移到 Spotify。这个分支在原项目基础上补充了 Spotify 2026 Development Mode API 兼容、歌单断点续传、批量写入、未匹配报告，以及网易云“关注歌手/收藏专辑”迁移。
 
-## 运行
-1. 命令行输入`pip install -r requirements.txt`
-2. [创建Spotify app（如没有）](https://developer.spotify.com/documentation/web-api/concepts/apps)
-3. 替换`config.yml`里的所有值，说明如下:
-    - `client_id`: Spotify app的Client ID
-    - `client_id`: Spotify app的Client secret
-    - `redirect_uri`: Spotify app的Redirect URIs中任意一个
-    - `cover_image_path`: 新歌单封面图路径，如未改变默认值（DESIRED_SPOTIFY_PLAYLIST_COVER_IMAGE_PATH）则取用网易云歌单的封面图，因Spotify封面图大小限制，如自定义/网易云封面图大小超过256KB则降级用repo里的"assets/netease.png"
-    - `netease_playlist_id`: 想要迁移的网易云音乐歌单id，可通过网易云音乐Web端歌单链接拿到，比如链接为https://music.163.com/playlist?id=123456789&userid=xxxxxxxx<span>，歌单id就是123456789</span>
-4. 命令行输入`python cli.py`，也可以使用`python cli.py -l <ID1> <ID2> <ID3>`来批量导入多个歌单，此时`config.yml`里的歌单ID会被忽略
-5. 浏览器弹窗提示登录Spotify
-6. 等待运行即可，命令行会显示进度，Spotify无版权的歌曲也会在命令行提示(详见下方)
+> 注意：歌曲匹配依赖两个平台的搜索结果，不能保证 100% 准确。请在迁移后核对歌单顺序和未匹配报告。Spotify 可能限制 Development Mode 应用的用户、搜索和调用配额，大型曲库迁移可能需要分次进行。
 
-## 歌单名为网易云歌单名，如Spotify有同名歌单也会创建新的歌单，改名/合并歌单都可以在Spotify直接操作
+## 功能
 
-## "无版权"歌曲
-由于之前版本经常会出现名字完全不同的歌也被加到Spotify里，现加入[year search query filter](https://developer.spotify.com/documentation/web-api/reference/search)缩小搜索范围（大幅减少，不代表完全没有了），但由于网易云音乐歌曲的收录时间可能和Spotify不同，这样会导致很多歌Spotify明明有，但是程序说没有。个人认为这样比不加year search query filter好处理，因为后者不易察觉，前者只需手动再加一次就好了，以下两种类型的歌曲最容易触发“无版权”:
-  - 年代久远的歌，Spotify显示原发行日期而网易云音乐显示开始有版权的日期，如
-    - ![](assets/a173ac5dc01437f35f3a6cfc2cc1d0b.png)
-    - ![](assets/3732801a646edf5f3acfd264cb159cb.png)
-  - 歌名在网易云音乐和Spotify不一样的歌（尤其是小语种歌名），如
-    - ![](assets/339ccec0c67d5ea9937582df35d69e4.png)
+- `cli.py`：迁移一个或多个网易云歌单。
+- `netease_playlist_resume_2026.py`：按源歌单顺序分批迁移，支持断点续传和复用已有 Spotify 歌单。
+- `netease_library_to_spotify_2026.py`：迁移网易云关注歌手和收藏专辑，需要本人的网易云网页 Cookie。
+- `clear_spotify_saved_albums_2026.py`：可选清理工具。它会先导出 CSV 备份，再要求输入完整确认语句后才取消收藏全部 Spotify 专辑。
 
-其余无版权歌曲大概率是Spotify真没版权
-<br/>
-为避免unicode exception，非英文的无版权歌曲会用字母提示![](assets/043655bf07fc66a9e36e0f7570b33d5.png)
+## 安装
 
-## OAuth 2.0 Client
-虽然用的是Spotipy库，但之前写过一个适用于所有OAuth 2.0 app获取access token的基类，只需替换`OAuth2Client.py`中的`AUTHORIZATION_ENDPOINT`和`ACCESS_TOKEN_ENDPOINT`即可，详见[这篇博客](https://muyangye.github.io/portfolio/portfolio-2/) (不过抱歉是全英文的，因为本人是留学生在美国找工作所以就写了英文博客2333)
+1. 需要 Python 3.9 或更高版本。
+2. 安装依赖：
 
-## 鸣谢
-- [pyncm](https://github.com/mos9527/pyncm): 感谢老哥的网易云音乐API，真不理解为啥网易云音乐只开放API给合作方
-- [spotipy](https://github.com/spotipy-dev/spotipy): 本来研究了挺久OAuth 2.0写好所有raw requests的基类了，然后发现了这个。。。
-- [这个issue](https://github.com/Binaryify/NeteaseCloudMusicApi/issues/1121#issuecomment-774438040)
+   ```bash
+   python3 -m pip install -r requirements.txt
+   ```
+
+3. 在 [Spotify Developer Dashboard](https://developer.spotify.com/dashboard) 创建应用，并将 Redirect URI 设为与配置完全一致的回调地址，例如 `http://127.0.0.1:8888/callback`。
+4. 复制示例配置：
+
+   ```bash
+   cp config.example.yml config.yml
+   ```
+
+5. 只在本地填写 `config.yml`。该文件已被 `.gitignore` 排除，不应提交到 GitHub。
+
+## 用法
+
+迁移 `config.yml` 中的单个歌单：
+
+```bash
+python3 cli.py
+```
+
+一次迁移多个歌单：
+
+```bash
+python3 cli.py -l <歌单ID1> <歌单ID2>
+```
+
+使用断点续传版：
+
+```bash
+python3 netease_playlist_resume_2026.py
+python3 netease_playlist_resume_2026.py --resume-index 694 --playlist-id "<Spotify 歌单 ID 或链接>"
+```
+
+迁移关注歌手和收藏专辑：
+
+```bash
+python3 netease_library_to_spotify_2026.py
+python3 netease_library_to_spotify_2026.py --artists
+python3 netease_library_to_spotify_2026.py --albums
+```
+
+这项功能需要登录后的网易云 Cookie。可将它保存在本地 `config.yml` 的 `netease_cookie` 字段，或临时通过 `NETEASE_COOKIE` 环境变量传入。Cookie 等同于登录凭证，不要发给他人、截图公开或提交到仓库。
+
+可选清空 Spotify 收藏专辑：
+
+```bash
+python3 clear_spotify_saved_albums_2026.py
+```
+
+该脚本会修改 Spotify 账号数据。请先检查生成的 CSV 备份，并确认你确实希望取消收藏全部专辑。
+
+## 本地生成文件与隐私
+
+脚本会在本地生成 OAuth 令牌缓存、断点文件、未匹配 CSV 和收藏专辑备份。这些文件可能包含账号凭据、歌单 ID、音乐偏好或其他个人数据，已统一加入 `.gitignore`。发布或提交前请再次确认没有包含：
+
+- `config.yml` 和任何 Spotify Client Secret；
+- 网易云 Cookie、Spotify OAuth 缓存或访问令牌；
+- 断点 JSON、未匹配曲目 CSV、专辑备份 CSV；
+- 含有本地路径、真实歌单链接或账号信息的个人命令记录。
+
+## 原项目与许可
+
+本项目是 [muyangye/Netease_To_Spotify](https://github.com/muyangye/Netease_To_Spotify) 的衍生版本。感谢原作者 [Muyang Ye](https://github.com/muyangye) 及原项目贡献者。原项目和本衍生版本均依照 [MIT License](LICENSE) 发布；原始版权声明和许可条款已保留。更详细的来源与改动说明见 [NOTICE.md](NOTICE.md)。
+
+这是社区项目，与网易云音乐或 Spotify 没有官方关联。请自行遵守两个平台的条款及所在地法律。
+
+## 上游项目鸣谢
+
+- [pyncm](https://github.com/mos9527/pyncm)
+- [Spotipy](https://github.com/spotipy-dev/spotipy)
+- [Binaryify/NeteaseCloudMusicApi issue #1121](https://github.com/Binaryify/NeteaseCloudMusicApi/issues/1121#issuecomment-774438040)

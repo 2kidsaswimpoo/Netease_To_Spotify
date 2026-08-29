@@ -1,6 +1,23 @@
 .idea/
+.DS_Store
 
-.cache
+.venv/
 venv/
 __pycache__/
+*.py[cod]
+
+# Local credentials and OAuth tokens
 config.yml
+.env
+.cache*
+
+# User-specific migration data and generated reports
+.*migration_state.json
+.clear_spotify_saved_albums_state.json
+*_unmatched.csv
+spotify_saved_albums_backup_*.csv
+*.tmp
+
+# Personal notes and local backups
+old_*.py
+运行命令.txt
