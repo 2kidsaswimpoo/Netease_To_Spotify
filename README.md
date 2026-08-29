@@ -60,7 +60,7 @@ python3 netease_library_to_spotify_2026.py --artists
 python3 netease_library_to_spotify_2026.py --albums
 ```
 
-这项功能需要登录后的网易云 Cookie。可将它保存在本地 `config.yml` 的 `netease_cookie` 字段，或临时通过 `NETEASE_COOKIE` 环境变量传入。Cookie 等同于登录凭证，不要发给他人、截图公开或提交到仓库。
+这项功能需要登录后的网易云 Cookie。可将它保存在本地 `config.yml` 的 `netease_cookie` 字段，或临时通过 `NETEASE_COOKIE` 环境变量传入。
 
 可选清空 Spotify 收藏专辑：
 
@@ -72,12 +72,7 @@ python3 clear_spotify_saved_albums_2026.py
 
 ## 本地生成文件与隐私
 
-脚本会在本地生成 OAuth 令牌缓存、断点文件、未匹配 CSV 和收藏专辑备份。这些文件可能包含账号凭据、歌单 ID、音乐偏好或其他个人数据，已统一加入 `.gitignore`。发布或提交前请再次确认没有包含：
-
-- `config.yml` 和任何 Spotify Client Secret；
-- 网易云 Cookie、Spotify OAuth 缓存或访问令牌；
-- 断点 JSON、未匹配曲目 CSV、专辑备份 CSV；
-- 含有本地路径、真实歌单链接或账号信息的个人命令记录。
+脚本会在本地生成 OAuth 令牌缓存、断点文件、未匹配 CSV 和收藏专辑备份。这些文件可能包含账号凭据、歌单 ID、音乐偏好或其他个人数据。
 
 ## 原项目与许可
 
