@@ -29,7 +29,7 @@
    cp config.example.yml config.yml
    ```
 
-5. 只在本地填写 `config.yml`。该文件已被 `.gitignore` 排除，不应提交到 GitHub。
+5. 填写 `config.yml`。
 
 ## 用法
 
