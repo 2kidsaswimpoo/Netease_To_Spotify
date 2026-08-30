@@ -22,7 +22,7 @@
    python3 -m pip install -r requirements.txt
    ```
 
-3. 在 [Spotify Developer Dashboard](https://developer.spotify.com/dashboard) 创建应用，并将 Redirect URI 设为与配置完全一致的回调地址，例如 `http://127.0.0.1:8888/callback`。
+3. 在 [Spotify Developer Dashboard](https://developer.spotify.com/dashboard) 创建应用，并将 Redirect URI 设为与配置完全一致的回调地址，例如 `http://127.0.0.1:8888/callback`。使用Spotify Developer应用需要你拥有Spotify Premium订阅。
 4. 复制示例配置：
 
    ```bash
